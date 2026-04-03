@@ -1,8 +1,9 @@
--- Data Cleaning
+## -- Data Cleaning
 -- 1. Remove duplicates
 -- 2. Standardize the data
 -- 3. Null or blank values
 -- 4. Remove any columns
+
 select *
 from layoff_data; 
 create table layoff_data_new
@@ -13,7 +14,7 @@ from layoff_data;
 select *
 from layoff_data_new;
 
--- Remove duplicates and create table
+## -- Remove duplicates and create table
 
 select *,
 row_number() over (
@@ -34,7 +35,7 @@ select *
 from next_layoff
 LIMIT 1000000;
 
--- Standardizing data
+## -- Standardizing data
 
 -- trimming
 select trim(company)
@@ -59,7 +60,7 @@ where country like 'unitedstates%';
 select country
 from next_layoff;
 
--- null and blank 
+## -- null and blank 
 select *
 from next_layoff
 where industry is null
@@ -83,7 +84,7 @@ select company, industry
  where industry is null
 or industry = ''; 
 
--- delete rows
+## -- delete rows
 delete
 from next_layoff
 where total_laid_off is null
@@ -91,7 +92,7 @@ and percentage_laid_off is null;
 select *
 from next_layoff;
 
--- delete column(s)
+## -- delete column(s)
 alter table next_layoff
 drop column row_numb;
 select *
