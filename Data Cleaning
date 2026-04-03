@@ -1,1 +1,98 @@
+-- Data Cleaning
+-- 1. Remove duplicates
+-- 2. Standardize the data
+-- 3. Null or blank values
+-- 4. Remove any columns
+select *
+from layoff_data; 
+create table layoff_data_new
+like layoff_data;
+insert layoff_data_new
+select *
+from layoff_data;
+select *
+from layoff_data_new;
 
+-- Remove duplicates and create table
+
+select *,
+row_number() over (
+partition by company, location, industry, total_laid_off, percentage_laid_off, 'date', stage, country, funds_raised_millions ) as row_numb
+from layoff_data_new;
+create TABLE next_layoff as
+select *
+from (
+select *,
+row_number() over (
+partition by company, location, industry, total_laid_off, percentage_laid_off, 'date', stage, country, funds_raised_millions ) as row_numb
+from layoff_data_new)subquery
+;
+DELETE
+FROM next_layoff
+where row_numb > 1;
+select *
+from next_layoff
+LIMIT 1000000;
+
+-- Standardizing data
+
+-- trimming
+select trim(company)
+from next_layoff;
+update next_layoff
+set company = trim(company);
+
+-- replacing data values
+select *
+from next_layoff
+where industry like 'crypto%';
+update next_layoff
+set industry = 'crypto'
+where industry like 'crypto%';
+select industry
+from next_layoff;
+select distinct(country), trim(trailing '.' from country)
+from next_layoff;
+update next_layoff
+set country = trim(trailing '.' from country)
+where country like 'unitedstates%';
+select country
+from next_layoff;
+
+-- null and blank 
+select *
+from next_layoff
+where industry is null
+or industry = '';
+update next_layoff
+set industry = null
+where industry = '';
+select n1.industry, n2.industry
+from next_layoff as n1
+join next_layoff as n2
+on n1.company = n2.company
+where n1.industry is null
+and n2.industry is not null;
+update next_layoff as n1
+join next_layoff as n2
+on n1.company = n2.company
+set n1.industry = n2.industry
+where n1.industry is null
+and n2.industry is not null;
+select company, industry
+ where industry is null
+or industry = ''; 
+
+-- delete rows
+delete
+from next_layoff
+where total_laid_off is null
+and percentage_laid_off is null;
+select *
+from next_layoff;
+
+-- delete column(s)
+alter table next_layoff
+drop column row_numb;
+select *
+from next_layoff;
